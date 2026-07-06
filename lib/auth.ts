@@ -31,7 +31,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   return {
     role,
-    name: role === "owner" ? "Owner" : "Manager",
+    name: role === "owner" ? "Oleksii" : "William",
   };
 }
 

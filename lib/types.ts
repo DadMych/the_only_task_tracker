@@ -103,8 +103,8 @@ export const SITE_LABELS: Record<TaskSite, string> = {
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
-  owner: "Owner",
-  boss: "Manager",
+  owner: "Oleksii",
+  boss: "William",
 };
 
 export const TASK_SITES: TaskSite[] = [

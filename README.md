@@ -36,8 +36,8 @@ npm run dev
 
 | Role | Variable | URL |
 |------|----------|-----|
-| Owner | `ACCESS_TOKEN_OWNER` | `/access/<token>` |
-| Manager | `ACCESS_TOKEN_BOSS` | `/access/<token>` |
+| Oleksii | `ACCESS_TOKEN_OWNER` | `/access/<token>` |
+| William | `ACCESS_TOKEN_BOSS` | `/access/<token>` |
 
 Personal links are stored locally in `access-links.txt` (gitignored).
 
