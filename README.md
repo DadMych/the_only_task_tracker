@@ -2,6 +2,8 @@
 
 Task tracker with personal-link access and Telegram notifications.
 
+**Production:** https://the-only-task-tracker.vercel.app
+
 ## Database: Turso
 
 On Vercel, file-based SQLite does not work — we use **[Turso](https://turso.tech)** (libSQL, SQLite-compatible cloud DB).
@@ -32,12 +34,16 @@ cp .env.example .env.local
 npm run dev
 ```
 
+Local dev: http://localhost:3000
+
 ## Access
 
-| Role | Variable | URL |
-|------|----------|-----|
-| Oleksii | `ACCESS_TOKEN_OWNER` | `/access/<token>` |
-| William | `ACCESS_TOKEN_BOSS` | `/access/<token>` |
+Production links (replace tokens with yours from `.env.local`):
+
+| Role | URL |
+|------|-----|
+| Oleksii | `https://the-only-task-tracker.vercel.app/access/<ACCESS_TOKEN_OWNER>` |
+| William | `https://the-only-task-tracker.vercel.app/access/<ACCESS_TOKEN_BOSS>` |
 
 Personal links are stored locally in `access-links.txt` (gitignored).
 
@@ -51,9 +57,11 @@ Personal links are stored locally in `access-links.txt` (gitignored).
 
 ## Telegram
 
-Notifications go to the owner only (`TELEGRAM_CHAT_ID_OWNER`) on create, update, and delete.
+Notifications go to Oleksii only (`TELEGRAM_CHAT_ID_OWNER`) on task create/update/delete and on comments/replies.
 
 ## Deploy on Vercel
+
+Live at [the-only-task-tracker.vercel.app](https://the-only-task-tracker.vercel.app)
 
 1. Push to [GitHub](https://github.com/DadMych/the_only_task_tracker)
 2. Import project in Vercel

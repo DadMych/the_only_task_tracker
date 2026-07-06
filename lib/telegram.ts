@@ -1,4 +1,4 @@
-import type { Activity, Task } from "./types";
+import type { Activity, Comment, Role, Task } from "./types";
 import {
   CATEGORY_LABELS,
   IMPORTANCE_LABELS,
@@ -18,6 +18,8 @@ const ACTION_LABELS = {
   created: "🆕 New task",
   updated: "✏️ Update",
   deleted: "🗑 Deleted",
+  comment: "💬 Comment",
+  reply: "↩️ Reply",
 } as const;
 
 function escapeHtml(text: string): string {
@@ -28,14 +30,20 @@ function escapeHtml(text: string): string {
 }
 
 function taskSummary(task: Task): string {
-  return [
+  const lines = [
     `<b>${escapeHtml(task.title)}</b>`,
     `🌐 ${SITE_LABELS[task.site]}`,
     `${IMPORTANCE_EMOJI[task.importance]} ${IMPORTANCE_LABELS[task.importance]}`,
     task.urgency === "urgent" ? "⚡ Urgent" : "⏳ Not urgent",
     `📂 ${CATEGORY_LABELS[task.category]}`,
     `📋 ${STATUS_LABELS[task.status]}`,
-  ].join("\n");
+  ];
+
+  if (task.description.trim()) {
+    lines.push(`\n📄 ${escapeHtml(task.description.trim())}`);
+  }
+
+  return lines.join("\n");
 }
 
 export async function notifyTaskCreated(task: Task, actor: Activity["actor"]) {
@@ -61,6 +69,29 @@ export async function notifyTaskDeleted(
   await sendMessage(
     `${ACTION_LABELS.deleted}\n\n<b>${escapeHtml(taskTitle)}</b>\n👤 ${ROLE_LABELS[actor]}`
   );
+}
+
+export async function notifyTaskComment(
+  task: Task,
+  comment: Comment,
+  actor: Role,
+  parent?: Comment
+) {
+  const isReply = !!comment.parent_id;
+  const header = isReply ? ACTION_LABELS.reply : ACTION_LABELS.comment;
+  const lines = [
+    `${header} on <b>${escapeHtml(task.title)}</b>`,
+    "",
+    escapeHtml(comment.body),
+  ];
+
+  if (parent) {
+    lines.push("", `↩️ Re: ${escapeHtml(parent.body.trim())}`);
+  }
+
+  lines.push("", `👤 ${ROLE_LABELS[actor]}`);
+
+  await sendMessage(lines.join("\n"));
 }
 
 async function sendMessage(text: string): Promise<void> {

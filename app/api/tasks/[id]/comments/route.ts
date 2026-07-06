@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { createComment, getTask, getTaskComments } from "@/lib/db";
+import {
+  createComment,
+  getComment,
+  getTask,
+  getTaskComments,
+} from "@/lib/db";
+import { notifyTaskComment } from "@/lib/telegram";
 
 interface Context {
   params: Promise<{ id: string }>;
@@ -45,6 +51,14 @@ export async function POST(request: Request, { params }: Context) {
 
   if (!comment) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const task = await getTask(id);
+  if (task) {
+    const parent = comment.parent_id
+      ? await getComment(comment.parent_id)
+      : undefined;
+    await notifyTaskComment(task, comment, user.role, parent);
   }
 
   return NextResponse.json({ comment }, { status: 201 });
