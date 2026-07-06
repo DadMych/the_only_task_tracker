@@ -18,7 +18,8 @@ export type TaskSite =
   | "store.realreality.com"
   | "fofgod.com"
   | "sacraments.fofgod.com"
-  | "spiritualblueprint.com";
+  | "spiritualblueprint.com"
+  | "other";
 
 export interface Task {
   id: string;
@@ -100,6 +101,7 @@ export const SITE_LABELS: Record<TaskSite, string> = {
   "fofgod.com": "FoFGod",
   "sacraments.fofgod.com": "Sacraments",
   "spiritualblueprint.com": "Spiritual Blueprint",
+  other: "Other",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -112,6 +114,7 @@ export const TASK_SITES: TaskSite[] = [
   "fofgod.com",
   "sacraments.fofgod.com",
   "spiritualblueprint.com",
+  "other",
 ];
 
 export const TASK_CATEGORIES: TaskCategory[] = [

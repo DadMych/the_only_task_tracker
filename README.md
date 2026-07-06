@@ -49,7 +49,7 @@ Personal links are stored locally in `access-links.txt` (gitignored).
 
 ## Task fields
 
-- **Site:** store.realreality.com, fofgod.com, sacraments.fofgod.com, spiritualblueprint.com
+- **Site:** store.realreality.com, fofgod.com, sacraments.fofgod.com, spiritualblueprint.com, other
 - **Category:** bug, feature, content, design, deploy, other
 - **Urgency:** urgent / not urgent
 - **Importance:** green (low) / yellow (medium) / red (high)
