@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-tokens": "node scripts/generate-tokens.js"
+    "generate-tokens": "node scripts/generate-tokens.js",
+    "setup-turso": "node scripts/setup-turso.js"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
