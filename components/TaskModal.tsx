@@ -18,9 +18,12 @@ import {
   TASK_SITES,
   URGENCY_LABELS,
 } from "@/lib/types";
+import type { SessionUser } from "@/lib/types";
+import { TaskComments } from "./TaskComments";
 
 interface TaskModalProps {
   task: Task;
+  user: SessionUser;
   onClose: () => void;
   onUpdate: () => void;
 }
@@ -38,7 +41,7 @@ const IMPORTANCE_COLORS: Record<TaskImportance, string> = {
   red: "bg-red-500",
 };
 
-export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
+export function TaskModal({ task, user, onClose, onUpdate }: TaskModalProps) {
   async function patch(updates: Partial<Task>) {
     await fetch("/api/tasks", {
       method: "PATCH",
@@ -49,7 +52,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
   }
 
   async function handleDelete() {
-    if (!confirm("Удалить задачу?")) return;
+    if (!confirm("Delete this task?")) return;
     await fetch(`/api/tasks?id=${task.id}`, { method: "DELETE" });
     onClose();
     onUpdate();
@@ -63,7 +66,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
 
       <div
-        className="relative glass rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up"
+        className="relative glass rounded-2xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -97,7 +100,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
 
         <textarea
           className="input-field resize-none h-28 mb-5"
-          placeholder="Добавьте описание..."
+          placeholder="Add a description..."
           defaultValue={task.description}
           onBlur={(e) => {
             if (e.target.value !== task.description) {
@@ -108,7 +111,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
 
         <div className="space-y-4">
           <SelectField
-            label="Сайт"
+            label="Site"
             value={task.site}
             options={TASK_SITES.map((s) => ({
               value: s,
@@ -118,7 +121,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
           />
 
           <ChipField
-            label="Категория"
+            label="Category"
             value={task.category}
             options={TASK_CATEGORIES.map((c) => ({
               value: c,
@@ -128,7 +131,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
           />
 
           <ChipField
-            label="Срочность"
+            label="Urgency"
             value={task.urgency}
             options={(Object.keys(URGENCY_LABELS) as TaskUrgency[]).map(
               (u) => ({ value: u, label: URGENCY_LABELS[u] })
@@ -139,7 +142,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
 
           <div>
             <label className="text-xs text-zinc-500 uppercase tracking-wider mb-2 block">
-              Важность
+              Importance
             </label>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(IMPORTANCE_LABELS) as TaskImportance[]).map((i) => (
@@ -167,7 +170,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
 
           <div>
             <label className="text-xs text-zinc-500 uppercase tracking-wider mb-2 block">
-              Статус
+              Status
             </label>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
@@ -188,6 +191,8 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
           </div>
         </div>
 
+        <TaskComments taskId={task.id} user={user} />
+
         <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5">
           <span className="text-[11px] text-zinc-600 font-mono">
             {task.id.slice(0, 8)}
@@ -196,7 +201,7 @@ export function TaskModal({ task, onClose, onUpdate }: TaskModalProps) {
             onClick={handleDelete}
             className="btn-ghost text-red-400/70 hover:text-red-400"
           >
-            Удалить
+            Delete
           </button>
         </div>
       </div>

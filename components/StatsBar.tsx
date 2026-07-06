@@ -20,10 +20,10 @@ export function StatsBar({ stats }: StatsBarProps) {
     <div className="glass rounded-xl p-4 mb-6 animate-slide-up">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-zinc-500 uppercase tracking-wider">
-          Обзор
+          Overview
         </span>
         <span className="text-xs text-zinc-400">
-          {total} {total === 1 ? "задача" : total < 5 ? "задачи" : "задач"}
+          {total} {total === 1 ? "task" : "tasks"}
         </span>
       </div>
 

@@ -7,9 +7,10 @@ interface ActivityFeedProps {
 }
 
 const ACTION_LABELS: Record<string, string> = {
-  created: "создал",
-  updated: "обновил",
-  deleted: "удалил",
+  created: "created",
+  updated: "updated",
+  deleted: "deleted",
+  commented: "commented on",
 };
 
 export function ActivityFeed({ activity }: ActivityFeedProps) {
@@ -17,10 +18,10 @@ export function ActivityFeed({ activity }: ActivityFeedProps) {
     return (
       <div className="glass rounded-xl p-5 animate-slide-up">
         <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-4">
-          Активность
+          Activity
         </h2>
         <p className="text-sm text-zinc-500 text-center py-4">
-          Пока нет событий
+          No activity yet
         </p>
       </div>
     );
@@ -29,7 +30,7 @@ export function ActivityFeed({ activity }: ActivityFeedProps) {
   return (
     <div className="glass rounded-xl p-5 animate-slide-up">
       <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-4">
-        Активность
+        Activity
       </h2>
       <ul className="space-y-3 max-h-[calc(100vh-12rem)] overflow-y-auto pr-1">
         {activity.map((item) => (
@@ -43,7 +44,7 @@ export function ActivityFeed({ activity }: ActivityFeedProps) {
                   </span>{" "}
                   {ACTION_LABELS[item.action] ?? item.action}{" "}
                   <span className="text-zinc-100 font-medium">
-                    «{item.task_title}»
+                    &ldquo;{item.task_title}&rdquo;
                   </span>
                 </p>
                 {item.details && (

@@ -48,7 +48,7 @@ export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) 
         ))}
 
         {tasks.length === 0 && (
-          <p className="text-xs text-zinc-600 text-center py-8">Пусто</p>
+          <p className="text-xs text-zinc-600 text-center py-8">Empty</p>
         )}
       </div>
     </div>

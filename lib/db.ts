@@ -4,6 +4,7 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import type {
   Activity,
+  Comment,
   Role,
   Task,
   TaskCategory,
@@ -75,8 +76,19 @@ async function initSchema(): Promise<void> {
       created_at TEXT NOT NULL,
       FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
     )`,
+    `CREATE TABLE IF NOT EXISTS comments (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      author TEXT NOT NULL,
+      body TEXT NOT NULL,
+      parent_id TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+      FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+    )`,
     "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)",
     "CREATE INDEX IF NOT EXISTS idx_activity_created ON activity(created_at DESC)",
+    "CREATE INDEX IF NOT EXISTS idx_comments_task ON comments(task_id, created_at ASC)",
   ]);
 
   await migrateLegacySchema(db);
@@ -231,10 +243,10 @@ export async function createTask(
   });
 
   const details = [
-    `Сайт: ${SITE_LABELS[task.site]}`,
-    `Категория: ${CATEGORY_LABELS[task.category]}`,
-    `Срочность: ${URGENCY_LABELS[task.urgency]}`,
-    `Важность: ${IMPORTANCE_LABELS[task.importance]}`,
+    `Site: ${SITE_LABELS[task.site]}`,
+    `Category: ${CATEGORY_LABELS[task.category]}`,
+    `Urgency: ${URGENCY_LABELS[task.urgency]}`,
+    `Importance: ${IMPORTANCE_LABELS[task.importance]}`,
   ].join("; ");
 
   const activity = await logActivity(id, task.title, "created", details, actor);
@@ -286,37 +298,37 @@ export async function updateTask(
 
   const changes: string[] = [];
   if (updates.title && updates.title !== existing.title) {
-    changes.push(`Название: «${existing.title}» → «${updates.title}»`);
+    changes.push(`Title: "${existing.title}" → "${updates.title}"`);
   }
   if (
     updates.description !== undefined &&
     updates.description !== existing.description
   ) {
-    changes.push("Обновлено описание");
+    changes.push("Description updated");
   }
   if (updates.status && updates.status !== existing.status) {
     changes.push(
-      `Статус: ${STATUS_LABELS[existing.status]} → ${STATUS_LABELS[updates.status]}`
+      `Status: ${STATUS_LABELS[existing.status]} → ${STATUS_LABELS[updates.status]}`
     );
   }
   if (updates.category && updates.category !== existing.category) {
     changes.push(
-      `Категория: ${CATEGORY_LABELS[existing.category]} → ${CATEGORY_LABELS[updates.category]}`
+      `Category: ${CATEGORY_LABELS[existing.category]} → ${CATEGORY_LABELS[updates.category]}`
     );
   }
   if (updates.urgency && updates.urgency !== existing.urgency) {
     changes.push(
-      `Срочность: ${URGENCY_LABELS[existing.urgency]} → ${URGENCY_LABELS[updates.urgency]}`
+      `Urgency: ${URGENCY_LABELS[existing.urgency]} → ${URGENCY_LABELS[updates.urgency]}`
     );
   }
   if (updates.importance && updates.importance !== existing.importance) {
     changes.push(
-      `Важность: ${IMPORTANCE_LABELS[existing.importance]} → ${IMPORTANCE_LABELS[updates.importance]}`
+      `Importance: ${IMPORTANCE_LABELS[existing.importance]} → ${IMPORTANCE_LABELS[updates.importance]}`
     );
   }
   if (updates.site && updates.site !== existing.site) {
     changes.push(
-      `Сайт: ${SITE_LABELS[existing.site]} → ${SITE_LABELS[updates.site]}`
+      `Site: ${SITE_LABELS[existing.site]} → ${SITE_LABELS[updates.site]}`
     );
   }
 
@@ -385,4 +397,72 @@ export async function getStats(): Promise<Record<TaskStatus, number>> {
   }
 
   return stats;
+}
+
+export async function getTaskComments(taskId: string): Promise<Comment[]> {
+  await ensureSchema();
+  const result = await getClient().execute({
+    sql: "SELECT * FROM comments WHERE task_id = ? ORDER BY created_at ASC",
+    args: [taskId],
+  });
+  return result.rows as unknown as Comment[];
+}
+
+export async function getComment(id: string): Promise<Comment | undefined> {
+  await ensureSchema();
+  const result = await getClient().execute({
+    sql: "SELECT * FROM comments WHERE id = ?",
+    args: [id],
+  });
+  const row = result.rows[0];
+  return row ? (row as unknown as Comment) : undefined;
+}
+
+export async function createComment(
+  taskId: string,
+  body: string,
+  author: Role,
+  parentId?: string | null
+): Promise<Comment | null> {
+  await ensureSchema();
+
+  const task = await getTask(taskId);
+  if (!task) return null;
+
+  if (parentId) {
+    const parent = await getComment(parentId);
+    if (!parent || parent.task_id !== taskId) return null;
+  }
+
+  const comment: Comment = {
+    id: uuidv4(),
+    task_id: taskId,
+    author,
+    body: body.trim(),
+    parent_id: parentId ?? null,
+    created_at: now(),
+  };
+
+  await getClient().execute({
+    sql: `INSERT INTO comments (id, task_id, author, body, parent_id, created_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [
+      comment.id,
+      comment.task_id,
+      comment.author,
+      comment.body,
+      comment.parent_id,
+      comment.created_at,
+    ],
+  });
+
+  await logActivity(
+    taskId,
+    task.title,
+    "commented",
+    parentId ? `Reply: ${body.trim().slice(0, 80)}` : body.trim().slice(0, 80),
+    author
+  );
+
+  return comment;
 }

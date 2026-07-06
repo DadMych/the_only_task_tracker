@@ -90,7 +90,7 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
             d="M12 4.5v15m7.5-7.5h-15"
           />
         </svg>
-        Новая задача
+        New task
       </button>
     );
   }
@@ -103,18 +103,18 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
       <input
         autoFocus
         className="input-field"
-        placeholder="Название задачи"
+        placeholder="Task title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
         className="input-field resize-none h-20"
-        placeholder="Описание (необязательно)"
+        placeholder="Description (optional)"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      <Field label="Сайт">
+      <Field label="Site">
         <select
           className="input-field"
           value={site}
@@ -128,7 +128,7 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
         </select>
       </Field>
 
-      <Field label="Категория">
+      <Field label="Category">
         <div className="flex flex-wrap gap-2">
           {TASK_CATEGORIES.map((c) => (
             <Chip
@@ -141,7 +141,7 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
         </div>
       </Field>
 
-      <Field label="Срочность">
+      <Field label="Urgency">
         <div className="flex gap-2">
           {(Object.keys(URGENCY_LABELS) as TaskUrgency[]).map((u) => (
             <Chip
@@ -155,7 +155,7 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
         </div>
       </Field>
 
-      <Field label="Важность">
+      <Field label="Importance">
         <div className="flex gap-2">
           {(Object.keys(IMPORTANCE_LABELS) as TaskImportance[]).map((i) => (
             <button
@@ -180,14 +180,14 @@ export function NewTaskForm({ onCreated }: NewTaskFormProps) {
 
       <div className="flex gap-2 pt-1">
         <button type="submit" className="btn-primary flex-1" disabled={loading}>
-          {loading ? "Сохранение..." : "Создать"}
+          {loading ? "Saving..." : "Create"}
         </button>
         <button
           type="button"
           className="btn-ghost"
           onClick={() => setOpen(false)}
         >
-          Отмена
+          Cancel
         </button>
       </div>
     </form>

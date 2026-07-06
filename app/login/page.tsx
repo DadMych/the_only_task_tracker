@@ -22,21 +22,21 @@ export default function LoginPage() {
           TFP Tracker
         </h1>
         <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-          Доступ только по персональной ссылке.
+          Access is by personal link only.
           <br />
-          Обратитесь к администратору, если ссылка утеряна.
+          Contact the admin if you lost your link.
         </p>
 
         <div className="rounded-lg bg-surface-overlay/50 p-4 text-left">
           <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
-            Как войти
+            How to sign in
           </p>
           <p className="text-sm text-zinc-300">
-            Откройте ссылку вида{" "}
+            Open the link you were sent, e.g.{" "}
             <code className="text-accent-muted font-mono text-xs">
-              /access/ваш-токен
+              /access/your-token
             </code>
-            , которую вам отправили.
+            .
           </p>
         </div>
       </div>

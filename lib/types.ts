@@ -48,11 +48,24 @@ export interface SessionUser {
   name: string;
 }
 
+export interface Comment {
+  id: string;
+  task_id: string;
+  author: Role;
+  body: string;
+  parent_id: string | null;
+  created_at: string;
+}
+
+export interface CommentNode extends Comment {
+  replies: CommentNode[];
+}
+
 export const STATUS_LABELS: Record<TaskStatus, string> = {
-  backlog: "Бэклог",
-  in_progress: "В работе",
-  review: "На проверке",
-  done: "Готово",
+  backlog: "Backlog",
+  in_progress: "In Progress",
+  review: "In Review",
+  done: "Done",
 };
 
 export const STATUS_ORDER: TaskStatus[] = [
@@ -63,23 +76,23 @@ export const STATUS_ORDER: TaskStatus[] = [
 ];
 
 export const CATEGORY_LABELS: Record<TaskCategory, string> = {
-  bug: "Баг",
-  feature: "Фича",
-  content: "Контент",
-  design: "Дизайн",
-  deploy: "Деплой",
-  other: "Другое",
+  bug: "Bug",
+  feature: "Feature",
+  content: "Content",
+  design: "Design",
+  deploy: "Deploy",
+  other: "Other",
 };
 
 export const URGENCY_LABELS: Record<TaskUrgency, string> = {
-  urgent: "Срочно",
-  not_urgent: "Не срочно",
+  urgent: "Urgent",
+  not_urgent: "Not urgent",
 };
 
 export const IMPORTANCE_LABELS: Record<TaskImportance, string> = {
-  green: "Низкая",
-  yellow: "Средняя",
-  red: "Высокая",
+  green: "Low",
+  yellow: "Medium",
+  red: "High",
 };
 
 export const SITE_LABELS: Record<TaskSite, string> = {
@@ -90,8 +103,8 @@ export const SITE_LABELS: Record<TaskSite, string> = {
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
-  owner: "Исполнитель",
-  boss: "Руководитель",
+  owner: "Owner",
+  boss: "Manager",
 };
 
 export const TASK_SITES: TaskSite[] = [

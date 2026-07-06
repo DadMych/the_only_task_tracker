@@ -15,9 +15,9 @@ const IMPORTANCE_EMOJI = {
 } as const;
 
 const ACTION_LABELS = {
-  created: "🆕 Новая задача",
-  updated: "✏️ Обновление",
-  deleted: "🗑 Удалена",
+  created: "🆕 New task",
+  updated: "✏️ Update",
+  deleted: "🗑 Deleted",
 } as const;
 
 function escapeHtml(text: string): string {
@@ -32,7 +32,7 @@ function taskSummary(task: Task): string {
     `<b>${escapeHtml(task.title)}</b>`,
     `🌐 ${SITE_LABELS[task.site]}`,
     `${IMPORTANCE_EMOJI[task.importance]} ${IMPORTANCE_LABELS[task.importance]}`,
-    task.urgency === "urgent" ? "⚡ Срочно" : "⏳ Не срочно",
+    task.urgency === "urgent" ? "⚡ Urgent" : "⏳ Not urgent",
     `📂 ${CATEGORY_LABELS[task.category]}`,
     `📋 ${STATUS_LABELS[task.status]}`,
   ].join("\n");

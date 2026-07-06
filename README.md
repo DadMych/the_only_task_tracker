@@ -1,67 +1,65 @@
 # The Only Task Tracker
 
-Трекер задач с доступом по персональным ссылкам и уведомлениями в Telegram.
+Task tracker with personal-link access and Telegram notifications.
 
-## БД: Turso (не Supabase)
+## Database: Turso
 
-На Vercel файловая SQLite не работает — используем **[Turso](https://turso.tech)** (libSQL, SQLite-совместимая облачная БД):
+On Vercel, file-based SQLite does not work — we use **[Turso](https://turso.tech)** (libSQL, SQLite-compatible cloud DB).
 
-- бесплатный tier хватит на двоих
-- нативно работает в serverless
-- локально — `file:data/tracker.db` без Turso-аккаунта
+- Free tier is enough for two users
+- Works natively in serverless
+- Locally uses `file:data/tracker.db` when Turso env vars are empty
 
-### Настройка Turso для Vercel
+### Turso setup for Vercel
 
 ```bash
-# установить CLI
 brew install tursodatabase/tap/turso
-
 turso auth login
-turso db create the-only-task-tracker
-turso db show the-only-task-tracker --url
-turso db tokens create the-only-task-tracker
+npm run setup-turso
 ```
 
-Добавить в Vercel → Settings → Environment Variables:
-- `TURSO_DATABASE_URL` — libsql://...
-- `TURSO_AUTH_TOKEN` — токен из CLI
+Add to Vercel → Settings → Environment Variables:
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
 
-## Быстрый старт (локально)
+## Quick start (local)
 
 ```bash
 npm install
-npm run generate-tokens   # токены доступа → в .env.local
+npm run generate-tokens   # access tokens → .env.local
 cp .env.example .env.local
-# заполнить TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID_OWNER
+# fill TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID_OWNER
 npm run dev
 ```
 
-## Доступ
+## Access
 
-| Роль | Переменная | URL |
-|------|-----------|-----|
-| Исполнитель | `ACCESS_TOKEN_OWNER` | `/access/<token>` |
-| Руководитель | `ACCESS_TOKEN_BOSS` | `/access/<token>` |
+| Role | Variable | URL |
+|------|----------|-----|
+| Owner | `ACCESS_TOKEN_OWNER` | `/access/<token>` |
+| Manager | `ACCESS_TOKEN_BOSS` | `/access/<token>` |
 
-## Поля задачи
+Personal links are stored locally in `access-links.txt` (gitignored).
 
-- **Сайт:** store.realreality.com, fofgod.com, sacraments.fofgod.com, spiritualblueprint.com
-- **Категория:** баг, фича, контент, дизайн, деплой, другое
-- **Срочность:** срочно / не срочно
-- **Важность:** 🟢 низкая / 🟡 средняя / 🔴 высокая
-- **Статус:** бэклог → в работе → на проверке → готово
+## Task fields
+
+- **Site:** store.realreality.com, fofgod.com, sacraments.fofgod.com, spiritualblueprint.com
+- **Category:** bug, feature, content, design, deploy, other
+- **Urgency:** urgent / not urgent
+- **Importance:** green (low) / yellow (medium) / red (high)
+- **Status:** backlog → in progress → in review → done
 
 ## Telegram
 
-Уведомления только исполнителю (`TELEGRAM_CHAT_ID_OWNER`). При создании, обновлении и удалении задачи.
+Notifications go to the owner only (`TELEGRAM_CHAT_ID_OWNER`) on create, update, and delete.
 
-## Деплой на Vercel
+## Deploy on Vercel
 
-1. Push в [GitHub](https://github.com/DadMych/the_only_task_tracker)
-2. Import project в Vercel
-3. Добавить env variables (см. `.env.example`)
+1. Push to [GitHub](https://github.com/DadMych/the_only_task_tracker)
+2. Import project in Vercel
+3. Add env variables (see `.env.example`)
 4. Deploy
 
-## Переменные окружения
+## Environment variables
 
-См. `.env.example` — секреты только в Vercel / локальном `.env.local`, **не в git**.
+See `.env.example` — secrets only in Vercel / local `.env.local`, never in git.

@@ -38,30 +38,30 @@ function upsertEnv(key, value) {
   fs.writeFileSync(ENV_PATH, content);
 }
 
-console.log("\n🗄  Turso setup\n");
+console.log("\nTurso setup\n");
 
 if (!sh("turso auth whoami")) {
-  console.error("❌ Не залогинен в Turso. Сначала выполни:\n");
+  console.error("Not logged in to Turso. Run first:\n");
   console.error("   turso auth login\n");
   process.exit(1);
 }
 
 const whoami = run("turso auth whoami");
-console.log(`✓ Аккаунт: ${whoami}`);
+console.log(`Account: ${whoami}`);
 
 const exists = sh(`turso db show ${DB_NAME}`);
 
 if (!exists) {
   if (fs.existsSync(LOCAL_DB)) {
-    console.log(`→ Создаю БД «${DB_NAME}» из локального data/tracker.db...`);
+    console.log(`Creating DB "${DB_NAME}" from local data/tracker.db...`);
     run(`turso db create ${DB_NAME} --from-file "${LOCAL_DB}"`);
   } else {
-    console.log(`→ Создаю БД «${DB_NAME}»...`);
+    console.log(`Creating DB "${DB_NAME}"...`);
     run(`turso db create ${DB_NAME}`);
   }
-  console.log("✓ База создана");
+  console.log("Database created");
 } else {
-  console.log(`✓ База «${DB_NAME}» уже существует`);
+  console.log(`Database "${DB_NAME}" already exists`);
 }
 
 const url = run(`turso db show ${DB_NAME} --url`);
@@ -70,7 +70,7 @@ const token = run(`turso db tokens create ${DB_NAME}`);
 upsertEnv("TURSO_DATABASE_URL", url);
 upsertEnv("TURSO_AUTH_TOKEN", token);
 
-console.log("\n✓ Записано в .env.local:");
+console.log("\nSaved to .env.local:");
 console.log(`  TURSO_DATABASE_URL=${url}`);
 console.log(`  TURSO_AUTH_TOKEN=${token.slice(0, 12)}...`);
-console.log("\n📌 Для Vercel — добавь те же переменные в Settings → Environment Variables\n");
+console.log("\nFor Vercel — add the same variables in Settings → Environment Variables\n");

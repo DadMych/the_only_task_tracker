@@ -85,6 +85,7 @@ export function BoardClient({
       {selectedTask && (
         <TaskModal
           task={selectedTask}
+          user={user}
           onClose={() => setSelectedTask(null)}
           onUpdate={refresh}
         />

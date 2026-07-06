@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "TFP Tracker",
-  description: "Трекер задач",
+  description: "Task tracker",
   robots: { index: false, follow: false },
 };
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
+    <html lang="en">
       <body
         className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}
       >
