@@ -62,6 +62,16 @@ export interface CommentNode extends Comment {
   replies: CommentNode[];
 }
 
+export interface TaskImage {
+  id: string;
+  task_id: string;
+  url: string;
+  filename: string;
+  mime_type: string;
+  uploaded_by: Role;
+  created_at: string;
+}
+
 export const STATUS_LABELS: Record<TaskStatus, string> = {
   backlog: "Backlog",
   in_progress: "In Progress",

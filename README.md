@@ -59,6 +59,12 @@ Personal links are stored locally in `access-links.txt` (gitignored).
 
 Notifications go to Oleksii only (`TELEGRAM_CHAT_ID_OWNER`) on task create/update/delete and on comments/replies.
 
+## Screenshots
+
+Task screenshots upload to **Vercel Blob** in production. Add `BLOB_READ_WRITE_TOKEN` in Vercel → Storage → Blob → Create Store → connect to project.
+
+Locally, files are stored in `data/uploads/` without a blob token.
+
 ## Deploy on Vercel
 
 Live at [the-only-task-tracker.vercel.app](https://the-only-task-tracker.vercel.app)

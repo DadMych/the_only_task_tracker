@@ -7,6 +7,7 @@ import type {
   Comment,
   Role,
   Task,
+  TaskImage,
   TaskCategory,
   TaskImportance,
   TaskSite,
@@ -89,6 +90,17 @@ async function initSchema(): Promise<void> {
     "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)",
     "CREATE INDEX IF NOT EXISTS idx_activity_created ON activity(created_at DESC)",
     "CREATE INDEX IF NOT EXISTS idx_comments_task ON comments(task_id, created_at ASC)",
+    `CREATE TABLE IF NOT EXISTS task_images (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      url TEXT NOT NULL,
+      filename TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      uploaded_by TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    )`,
+    "CREATE INDEX IF NOT EXISTS idx_task_images_task ON task_images(task_id, created_at ASC)",
   ]);
 
   await migrateLegacySchema(db);
@@ -465,4 +477,96 @@ export async function createComment(
   );
 
   return comment;
+}
+
+export async function getTaskImages(taskId: string): Promise<TaskImage[]> {
+  await ensureSchema();
+  const result = await getClient().execute({
+    sql: "SELECT * FROM task_images WHERE task_id = ? ORDER BY created_at ASC",
+    args: [taskId],
+  });
+  return result.rows as unknown as TaskImage[];
+}
+
+export async function getTaskImage(id: string): Promise<TaskImage | undefined> {
+  await ensureSchema();
+  const result = await getClient().execute({
+    sql: "SELECT * FROM task_images WHERE id = ?",
+    args: [id],
+  });
+  const row = result.rows[0];
+  return row ? (row as unknown as TaskImage) : undefined;
+}
+
+export async function addTaskImage(
+  taskId: string,
+  url: string,
+  filename: string,
+  mimeType: string,
+  uploadedBy: Role
+): Promise<TaskImage | null> {
+  await ensureSchema();
+  const task = await getTask(taskId);
+  if (!task) return null;
+
+  const image: TaskImage = {
+    id: uuidv4(),
+    task_id: taskId,
+    url,
+    filename,
+    mime_type: mimeType,
+    uploaded_by: uploadedBy,
+    created_at: now(),
+  };
+
+  await getClient().execute({
+    sql: `INSERT INTO task_images
+          (id, task_id, url, filename, mime_type, uploaded_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      image.id,
+      image.task_id,
+      image.url,
+      image.filename,
+      image.mime_type,
+      image.uploaded_by,
+      image.created_at,
+    ],
+  });
+
+  await logActivity(
+    taskId,
+    task.title,
+    "screenshot",
+    filename,
+    uploadedBy
+  );
+
+  return image;
+}
+
+export async function deleteTaskImage(
+  imageId: string,
+  actor: Role
+): Promise<{ ok: true; image: TaskImage } | { ok: false }> {
+  const image = await getTaskImage(imageId);
+  if (!image) return { ok: false };
+
+  const task = await getTask(image.task_id);
+  if (task) {
+    await logActivity(
+      image.task_id,
+      task.title,
+      "screenshot_deleted",
+      image.filename,
+      actor
+    );
+  }
+
+  await getClient().execute({
+    sql: "DELETE FROM task_images WHERE id = ?",
+    args: [imageId],
+  });
+
+  return { ok: true, image };
 }

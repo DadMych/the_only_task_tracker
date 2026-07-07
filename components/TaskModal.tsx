@@ -20,6 +20,7 @@ import {
 } from "@/lib/types";
 import type { SessionUser } from "@/lib/types";
 import { TaskComments } from "./TaskComments";
+import { TaskScreenshots } from "./TaskScreenshots";
 
 interface TaskModalProps {
   task: Task;
@@ -191,6 +192,7 @@ export function TaskModal({ task, user, onClose, onUpdate }: TaskModalProps) {
           </div>
         </div>
 
+        <TaskScreenshots taskId={task.id} />
         <TaskComments taskId={task.id} user={user} />
 
         <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5">

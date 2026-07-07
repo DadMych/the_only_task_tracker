@@ -11,6 +11,8 @@ const ACTION_LABELS: Record<string, string> = {
   updated: "updated",
   deleted: "deleted",
   commented: "commented on",
+  screenshot: "uploaded screenshot to",
+  screenshot_deleted: "removed screenshot from",
 };
 
 export function ActivityFeed({ activity }: ActivityFeedProps) {
