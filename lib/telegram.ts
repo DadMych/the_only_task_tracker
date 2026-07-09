@@ -20,6 +20,11 @@ const ACTION_LABELS = {
   deleted: "🗑 Deleted",
   comment: "💬 Comment",
   reply: "↩️ Reply",
+  agent: "🤖 AI Agent",
+  proposed: "✅ Proposed complete",
+  confirmed: "🎉 Confirmed done",
+  rejected: "↩️ Rejected",
+  reopened: "🔁 Reopened",
 } as const;
 
 function escapeHtml(text: string): string {
@@ -92,6 +97,63 @@ export async function notifyTaskComment(
   lines.push("", `👤 ${ROLE_LABELS[actor]}`);
 
   await sendMessage(lines.join("\n"));
+}
+
+export async function notifyAgentAction(
+  task: Task,
+  action: string,
+  details?: string
+) {
+  const lines = [
+    `${ACTION_LABELS.agent}: ${action}`,
+    "",
+    taskSummary(task),
+  ];
+  if (details?.trim()) {
+    lines.push("", escapeHtml(details.trim()));
+  }
+  await sendMessage(lines.join("\n"));
+}
+
+export async function notifyProposedComplete(task: Task, summary: string) {
+  await sendMessage(
+    `${ACTION_LABELS.proposed}\n\n${taskSummary(task)}\n\n📋 ${escapeHtml(summary.trim())}\n\n👤 AI Agent`
+  );
+}
+
+export async function notifyConfirmedComplete(
+  task: Task,
+  actor: Role,
+  note?: string
+) {
+  const lines = [
+    `${ACTION_LABELS.confirmed}\n\n${taskSummary(task)}`,
+  ];
+  if (note?.trim()) {
+    lines.push("", escapeHtml(note.trim()));
+  }
+  lines.push("", `👤 ${ROLE_LABELS[actor]}`);
+  await sendMessage(lines.join("\n"));
+}
+
+export async function notifyRejectedComplete(
+  task: Task,
+  actor: Role,
+  feedback: string
+) {
+  await sendMessage(
+    `${ACTION_LABELS.rejected}\n\n${taskSummary(task)}\n\n📝 ${escapeHtml(feedback.trim())}\n\n👤 ${ROLE_LABELS[actor]}`
+  );
+}
+
+export async function notifyReopened(
+  task: Task,
+  actor: Role,
+  summary: string
+) {
+  await sendMessage(
+    `${ACTION_LABELS.reopened}\n\n${taskSummary(task)}\n\n📋 ${escapeHtml(summary.trim())}\n\n👤 ${actor === "owner" ? "AI Agent" : ROLE_LABELS[actor]}`
+  );
 }
 
 async function sendMessage(text: string): Promise<void> {

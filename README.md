@@ -88,6 +88,7 @@ Copy `.env.example` to `.env.local` (local) or add them in **Vercel → Settings
 | `TURSO_AUTH_TOKEN` | Prod | Turso auth token |
 | `TELEGRAM_BOT_TOKEN` | No | Telegram bot token for notifications |
 | `TELEGRAM_CHAT_ID_OWNER` | No | Telegram chat ID to receive alerts |
+| `AGENT_API_TOKEN` | No | Bearer token for `/api/agent/*` (AI client access) |
 | `BLOB_READ_WRITE_TOKEN` | Prod | Vercel Blob token for screenshot storage |
 
 Generate access tokens:
@@ -148,7 +149,23 @@ When configured, the bot sends messages to Oleksii on:
 
 - Task created / updated / deleted
 - New comments and replies
+- AI agent actions (create, update, propose complete, reopen)
+- Review workflow (confirmed, rejected, reopened)
 - Includes task title, description, site, priority fields
+
+---
+
+## AI Agent API
+
+An AI client (Cursor, Claude Code, scripts) can manage tasks via REST — full read/write, bearer token auth, Telegram logging on every action.
+
+See **[docs/AI_AGENT_API.md](docs/AI_AGENT_API.md)** for the complete instruction set (endpoints, workflow, curl examples).
+
+```bash
+npm run generate-tokens   # also outputs AGENT_API_TOKEN
+```
+
+Workflow: agent **proposes complete** → human **confirms or rejects** in the board UI → agent can **reopen** with updates.
 
 ---
 

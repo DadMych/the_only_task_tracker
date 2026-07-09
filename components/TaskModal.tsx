@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type {
   Task,
@@ -43,6 +44,12 @@ const IMPORTANCE_COLORS: Record<TaskImportance, string> = {
 };
 
 export function TaskModal({ task, user, onClose, onUpdate }: TaskModalProps) {
+  const [workflowBusy, setWorkflowBusy] = useState(false);
+  const [rejectFeedback, setRejectFeedback] = useState("");
+  const [showReject, setShowReject] = useState(false);
+  const [reopenSummary, setReopenSummary] = useState("");
+  const [showReopen, setShowReopen] = useState(false);
+
   async function patch(updates: Partial<Task>) {
     await fetch("/api/tasks", {
       method: "PATCH",
@@ -58,6 +65,35 @@ export function TaskModal({ task, user, onClose, onUpdate }: TaskModalProps) {
     onClose();
     onUpdate();
   }
+
+  async function workflow(
+    action: "confirm" | "reject" | "reopen",
+    body: Record<string, string>
+  ) {
+    setWorkflowBusy(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/workflow/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error ?? "Workflow action failed");
+        return;
+      }
+      setShowReject(false);
+      setShowReopen(false);
+      setRejectFeedback("");
+      setReopenSummary("");
+      onUpdate();
+    } finally {
+      setWorkflowBusy(false);
+    }
+  }
+
+  const showReviewActions = task.status === "review";
+  const showReopenAction = task.status === "done";
 
   return (
     <div
@@ -191,6 +227,80 @@ export function TaskModal({ task, user, onClose, onUpdate }: TaskModalProps) {
             </div>
           </div>
         </div>
+
+        {showReviewActions && (
+          <div className="mt-5 p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+            <p className="text-xs text-zinc-400 uppercase tracking-wider">
+              Review — confirm or send back
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                disabled={workflowBusy}
+                onClick={() => workflow("confirm", {})}
+                className="px-4 py-2 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30 hover:bg-emerald-500/30 disabled:opacity-50"
+              >
+                Confirm done
+              </button>
+              <button
+                disabled={workflowBusy}
+                onClick={() => setShowReject((v) => !v)}
+                className="px-4 py-2 rounded-lg text-xs font-medium bg-red-500/20 text-red-300 ring-1 ring-red-500/30 hover:bg-red-500/30 disabled:opacity-50"
+              >
+                Reject
+              </button>
+            </div>
+            {showReject && (
+              <div className="space-y-2">
+                <textarea
+                  className="input-field resize-none h-20 text-sm"
+                  placeholder="What still needs to be done?"
+                  value={rejectFeedback}
+                  onChange={(e) => setRejectFeedback(e.target.value)}
+                />
+                <button
+                  disabled={workflowBusy || !rejectFeedback.trim()}
+                  onClick={() => workflow("reject", { feedback: rejectFeedback })}
+                  className="px-4 py-2 rounded-lg text-xs font-medium bg-red-500/20 text-red-300 ring-1 ring-red-500/30 disabled:opacity-50"
+                >
+                  Send back to in progress
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {showReopenAction && (
+          <div className="mt-5 p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+            <p className="text-xs text-zinc-400 uppercase tracking-wider">
+              Reopen task
+            </p>
+            {!showReopen ? (
+              <button
+                disabled={workflowBusy}
+                onClick={() => setShowReopen(true)}
+                className="px-4 py-2 rounded-lg text-xs font-medium bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/30 hover:bg-amber-500/30 disabled:opacity-50"
+              >
+                Reopen with updates
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <textarea
+                  className="input-field resize-none h-20 text-sm"
+                  placeholder="Why is this being reopened? What needs to change?"
+                  value={reopenSummary}
+                  onChange={(e) => setReopenSummary(e.target.value)}
+                />
+                <button
+                  disabled={workflowBusy || !reopenSummary.trim()}
+                  onClick={() => workflow("reopen", { summary: reopenSummary })}
+                  className="px-4 py-2 rounded-lg text-xs font-medium bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/30 disabled:opacity-50"
+                >
+                  Reopen
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <TaskScreenshots taskId={task.id} />
         <TaskComments taskId={task.id} user={user} />
