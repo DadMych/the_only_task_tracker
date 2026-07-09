@@ -7,10 +7,16 @@ import {
   SITE_LABELS,
 } from "@/lib/types";
 import { formatRelative } from "@/lib/utils";
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TaskCardProps {
   task: Task;
   onClick: () => void;
+}
+
+interface TaskCardOverlayProps {
+  task: Task;
 }
 
 const IMPORTANCE_DOT: Record<TaskImportance, string> = {
@@ -20,17 +26,66 @@ const IMPORTANCE_DOT: Record<TaskImportance, string> = {
 };
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: task.id,
+      data: { task, status: task.status },
+    });
+
+  const style = transform
+    ? { transform: CSS.Translate.toString(transform) }
+    : undefined;
+
   return (
-    <button
-      onClick={onClick}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      onClick={() => {
+        if (!isDragging) onClick();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={cn(
-        "w-full text-left rounded-lg p-3.5",
+        "w-full text-left rounded-lg p-3.5 touch-none select-none",
         "bg-surface-overlay/60 border border-white/[0.04]",
         "hover:border-accent/20 hover:bg-surface-overlay",
-        "transition-all duration-200 group",
+        "transition-[border-color,background-color,box-shadow,opacity] duration-200 group",
+        "cursor-grab active:cursor-grabbing",
+        task.urgency === "urgent" && "border-red-500/20",
+        isDragging && "opacity-35 ring-1 ring-accent/20"
+      )}
+    >
+      <TaskCardContent task={task} />
+    </div>
+  );
+}
+
+export function TaskCardOverlay({ task }: TaskCardOverlayProps) {
+  return (
+    <div
+      className={cn(
+        "w-full text-left rounded-lg p-3.5 select-none",
+        "bg-surface-overlay border border-white/[0.08]",
+        "shadow-2xl shadow-black/40 ring-2 ring-accent/30 scale-[1.02] cursor-grabbing",
         task.urgency === "urgent" && "border-red-500/20"
       )}
     >
+      <TaskCardContent task={task} />
+    </div>
+  );
+}
+
+function TaskCardContent({ task }: { task: Task }) {
+  return (
+    <>
       <div className="flex items-start gap-2 mb-2">
         <span
           className={cn(
@@ -62,7 +117,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       <p className="text-[11px] text-zinc-600 ml-4">
         {formatRelative(task.updated_at)}
       </p>
-    </button>
+    </>
   );
 }
 
